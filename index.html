@@ -14,6 +14,18 @@
         .sidebar-link:hover, .sidebar-link.active { background-color: #374151; color: white; }
         .content-page { display: none; }
         .content-page.active { display: block; }
+        .loader {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #3498db;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
     </style>
 </head>
 <body class="bg-gray-100">
@@ -22,7 +34,6 @@
     <div id="login-screen" class="flex items-center justify-center min-h-screen bg-gray-200">
         <div class="w-full max-w-md p-8 space-y-6 bg-white rounded-xl shadow-lg">
             <div class="flex justify-center">
-                <!-- Replace with your actual logo SVG or use this placeholder -->
                 <div class="flex items-center space-x-2">
                      <svg class="h-10 w-auto" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="40" height="40" rx="8" fill="#2563eb"/><path d="M12 12H16V28H12V12Z" fill="white"/><path d="M28 12H24V28H28V12Z" fill="white"/><path d="M12 19H28V23H12V19Z" fill="white"/></svg>
                     <span class="text-2xl font-bold text-gray-800">Heathrow Capital</span>
@@ -40,8 +51,9 @@
                 </div>
                 <p id="login-error" class="text-sm text-red-500 text-center hidden">Invalid username or password.</p>
                 <div>
-                    <button type="submit" class="w-full px-4 py-2 font-semibold text-white bg-blue-600 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors">
-                        Login
+                    <button type="submit" id="login-button" class="w-full flex justify-center items-center px-4 py-2 font-semibold text-white bg-blue-600 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors">
+                        <span id="login-button-text">Login</span>
+                        <div id="login-spinner" class="loader hidden"></div>
                     </button>
                 </div>
             </form>
@@ -100,48 +112,27 @@
                 </header>
                 <main class="flex-1 overflow-x-hidden overflow-y-auto bg-gray-200 p-6">
                     
-                    <!-- PAGE: Dashboard Home -->
                     <div id="dashboard-home-page" class="content-page active">
                         <h2 class="text-xl font-semibold text-gray-700 mb-4">Welcome to your Portal</h2>
                         <div class="p-6 bg-white rounded-lg shadow">
                             <p>This is your central hub for all your Heathrow Capital Partners resources. Use the navigation on the left to access your purchased document kits, view market reports, join webinars, and manage your subscription.</p>
                         </div>
                     </div>
-
-                    <!-- PAGE: Document Kits -->
                     <div id="documents-page" class="content-page">
                         <h2 class="text-xl font-semibold text-gray-700 mb-4">Your Document Kits</h2>
-                        <div id="documents-content" class="p-6 bg-white rounded-lg shadow">
-                            <!-- Content will be dynamically inserted here -->
-                            <p class="text-gray-500">Your purchased document kits will appear here.</p>
-                        </div>
+                        <div id="documents-content" class="p-6 bg-white rounded-lg shadow"></div>
                     </div>
-
-                    <!-- PAGE: Reports & Analytics -->
                     <div id="reports-page" class="content-page">
                         <h2 class="text-xl font-semibold text-gray-700 mb-4">Reports & Analytics</h2>
-                        <div id="reports-content" class="p-6 bg-white rounded-lg shadow">
-                            <!-- Content will be dynamically inserted here -->
-                             <p class="text-gray-500">Your purchased reports will appear here.</p>
-                        </div>
+                        <div id="reports-content" class="p-6 bg-white rounded-lg shadow"></div>
                     </div>
-
-                    <!-- PAGE: Webinars -->
                     <div id="webinars-page" class="content-page">
                         <h2 class="text-xl font-semibold text-gray-700 mb-4">Upcoming Webinars</h2>
-                        <div id="webinars-content" class="p-6 bg-white rounded-lg shadow">
-                            <!-- Content will be dynamically inserted here -->
-                             <p class="text-gray-500">Available webinars will appear here.</p>
-                        </div>
+                        <div id="webinars-content" class="p-6 bg-white rounded-lg shadow"></div>
                     </div>
-
-                    <!-- PAGE: Subscription -->
                     <div id="subscription-page" class="content-page">
                         <h2 class="text-xl font-semibold text-gray-700 mb-4">Manage Subscription</h2>
-                        <div id="subscription-content" class="p-6 bg-white rounded-lg shadow">
-                            <!-- Content will be dynamically inserted here -->
-                             <p class="text-gray-500">Your subscription details will appear here.</p>
-                        </div>
+                        <div id="subscription-content" class="p-6 bg-white rounded-lg shadow"></div>
                     </div>
 
                 </main>
@@ -150,49 +141,6 @@
     </div>
 
     <script>
-        // --- MOCK DATA (This will be replaced by your Azure Cosmos DB data) ---
-        // This is a simulation of what your database will store.
-        // You will manually add users and their content here.
-        const mockDatabase = {
-            "john@example.com": {
-                password: "password123",
-                name: "John Investor",
-                tier: "Pro",
-                content: {
-                    documents: `
-                        <div class="border-b pb-4 mb-4">
-                            <h3 class="font-semibold text-lg">The Ultimate Home Buyer's Kit</h3>
-                            <p class="text-sm text-gray-600">All the documents you need for a smooth home purchase.</p>
-                            <a href="#" class="text-blue-600 hover:underline mt-2 inline-block">Download Kit (.zip)</a>
-                        </div>`,
-                    reports: `
-                        <div class="border-b pb-4 mb-4">
-                            <h3 class="font-semibold text-lg">Lake Mary Q3 Market Report</h3>
-                            <p class="text-sm text-gray-600">In-depth analysis of market trends for the third quarter.</p>
-                            <a href="#" class="text-blue-600 hover:underline mt-2 inline-block">Download Report (.pdf)</a>
-                        </div>`,
-                    webinars: `<p>You have access to all webinars as a Pro member.</p>`,
-                    subscription: `<p>Your <strong>Pro Plan</strong> is active. Next renewal date: September 24, 2025.</p>`
-                }
-            },
-            "jane@example.com": {
-                password: "password456",
-                name: "Jane Landlord",
-                tier: "Basic",
-                content: {
-                    documents: `
-                        <div class="border-b pb-4 mb-4">
-                            <h3 class="font-semibold text-lg">The Landlord Essentials Kit</h3>
-                            <p class="text-sm text-gray-600">Manage your rental properties effectively.</p>
-                            <a href="#" class="text-blue-600 hover:underline mt-2 inline-block">Download Kit (.zip)</a>
-                        </div>`,
-                    reports: `<p>Upgrade to the Pro plan to access market reports.</p>`,
-                    webinars: `<p>Purchase webinar tickets individually or upgrade to Business for free access.</p>`,
-                    subscription: `<p>Your <strong>Basic Plan</strong> is active. Next renewal date: October 1, 2025.</p>`
-                }
-            }
-        };
-
         // --- APPLICATION LOGIC ---
         document.addEventListener('DOMContentLoaded', () => {
             const loginScreen = document.getElementById('login-screen');
@@ -202,19 +150,18 @@
             const logoutButton = document.getElementById('logout-button');
             const sidebarNav = document.getElementById('sidebar-nav');
             const pageTitle = document.getElementById('page-title');
-            
-            // Function to handle page navigation
-            const navigateTo = (hash) => {
-                // Hide all pages
-                document.querySelectorAll('.content-page').forEach(page => page.classList.remove('active'));
-                // Deactivate all sidebar links
-                sidebarNav.querySelectorAll('a').forEach(link => link.classList.remove('active'));
+            const loginButtonText = document.getElementById('login-button-text');
+            const loginSpinner = document.getElementById('login-spinner');
 
+            let currentUser = null;
+            
+            const navigateTo = (hash) => {
+                document.querySelectorAll('.content-page').forEach(page => page.classList.remove('active'));
+                sidebarNav.querySelectorAll('a').forEach(link => link.classList.remove('active'));
                 const targetHash = hash || '#dashboard-home';
                 const targetPageId = targetHash.substring(1) + '-page';
                 const targetPage = document.getElementById(targetPageId);
                 const targetLink = sidebarNav.querySelector(`a[href="${targetHash}"]`);
-
                 if (targetPage && targetLink) {
                     targetPage.classList.add('active');
                     targetLink.classList.add('active');
@@ -222,27 +169,25 @@
                 }
             };
 
-            // Function to show the dashboard
             const showDashboard = (user) => {
+                currentUser = user;
+                sessionStorage.setItem('loggedInUser', JSON.stringify(user));
                 loginScreen.style.display = 'none';
                 dashboard.style.display = 'block';
 
-                // Populate user-specific info
                 document.getElementById('user-name-display').textContent = user.name;
                 document.getElementById('user-tier-display').textContent = user.tier;
 
-                // Populate content panes
-                document.getElementById('documents-content').innerHTML = user.content.documents;
-                document.getElementById('reports-content').innerHTML = user.content.reports;
-                document.getElementById('webinars-content').innerHTML = user.content.webinars;
-                document.getElementById('subscription-content').innerHTML = user.content.subscription;
+                document.getElementById('documents-content').innerHTML = user.content.documents || '<p class="text-gray-500">No document kits found.</p>';
+                document.getElementById('reports-content').innerHTML = user.content.reports || '<p class="text-gray-500">No reports found.</p>';
+                document.getElementById('webinars-content').innerHTML = user.content.webinars || '<p class="text-gray-500">No webinars found.</p>';
+                document.getElementById('subscription-content').innerHTML = user.content.subscription || '<p class="text-gray-500">No subscription details found.</p>';
 
-                // Set initial page view
                 navigateTo(window.location.hash);
             };
 
-            // Function to handle logout
             const logout = () => {
+                currentUser = null;
                 sessionStorage.removeItem('loggedInUser');
                 window.location.hash = '';
                 loginScreen.style.display = 'flex';
@@ -250,48 +195,60 @@
                 loginForm.reset();
             };
 
-            // Check for a logged-in user in session storage
-            const loggedInUser = sessionStorage.getItem('loggedInUser');
-            if (loggedInUser) {
-                const user = mockDatabase[loggedInUser];
-                if (user) {
-                    showDashboard(user);
+            // Check for a logged-in user in session storage on page load
+            const storedUser = sessionStorage.getItem('loggedInUser');
+            if (storedUser) {
+                try {
+                    showDashboard(JSON.parse(storedUser));
+                } catch (e) {
+                    logout();
                 }
             } else {
                 loginScreen.style.display = 'flex';
             }
 
-            // Handle login form submission
-            loginForm.addEventListener('submit', (e) => {
+            loginForm.addEventListener('submit', async (e) => {
                 e.preventDefault();
                 loginError.classList.add('hidden');
+                loginButtonText.classList.add('hidden');
+                loginSpinner.classList.remove('hidden');
+
                 const username = e.target.username.value;
                 const password = e.target.password.value;
 
-                // --- THIS IS WHERE YOU'LL CALL YOUR AZURE FUNCTION ---
-                // For now, we simulate the check with our mock database
-                const user = mockDatabase[username];
-                if (user && user.password === password) {
-                    sessionStorage.setItem('loggedInUser', username);
-                    showDashboard(user);
-                } else {
+                try {
+                    const response = await fetch('/api/login', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ username, password })
+                    });
+
+                    const data = await response.json();
+
+                    if (response.ok && data.success) {
+                        showDashboard(data);
+                    } else {
+                        loginError.textContent = data.message || "Invalid username or password.";
+                        loginError.classList.remove('hidden');
+                    }
+                } catch (error) {
+                    loginError.textContent = "An error occurred. Please try again.";
                     loginError.classList.remove('hidden');
+                } finally {
+                    loginButtonText.classList.remove('hidden');
+                    loginSpinner.classList.add('hidden');
                 }
             });
             
-            // Handle sidebar navigation clicks
             sidebarNav.addEventListener('click', (e) => {
-                if (e.target.tagName === 'A' || e.target.closest('a')) {
-                    const link = e.target.closest('a');
+                const link = e.target.closest('a');
+                if (link) {
                     e.preventDefault();
                     window.location.hash = link.getAttribute('href');
                 }
             });
 
-            // Handle hash changes for back/forward browser buttons
             window.addEventListener('hashchange', () => navigateTo(window.location.hash));
-
-            // Handle logout button click
             logoutButton.addEventListener('click', logout);
         });
     </script>
