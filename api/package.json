@@ -1,10 +1,5 @@
 {
-  "name": "hcp-dashboard-root",
-  "version": "1.0.0",
-  "private": true,
-  "description": "Root package file for Azure Static Web App build process.",
-  "scripts": {
-    "test": "echo \"No tests specified\" && exit 0"
-  },
-  "devDependencies": {}
+  "dependencies": {
+    "@azure/cosmos": "^3.17.3"
+  }
 }
