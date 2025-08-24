@@ -1,30 +1,69 @@
+const { CosmosClient } = require("@azure/cosmos");
+
+// Get the connection string from the secure application settings
+const connectionString = process.env.COSMOS_DB_CONNECTION_STRING;
+if (!connectionString) {
+    throw new Error("COSMOS_DB_CONNECTION_STRING is not set in application settings.");
+}
+const client = new CosmosClient(connectionString);
+
+// CORRECTED: Database and container names
+const databaseId = "system-hcp-data";
+const containerId = "Users";
+
 module.exports = async function (context, req) {
-    context.log('Login function processed a request.');
+    context.log('Login function processed a real request.');
 
     const { username, password } = req.body;
 
-    // In the future, we will check the username/password against Cosmos DB here.
-    // For now, we'll just check against our mock data for testing.
+    if (!username || !password) {
+        context.res = {
+            status: 400,
+            body: { success: false, message: "Username and password are required." }
+        };
+        return;
+    }
 
-    if (username === "john@example.com" && password === "password123") {
-        context.res = {
-            status: 200, /* Defaults to 200 */
-            body: {
-                success: true,
-                name: "John Investor",
-                tier: "Pro",
-                content: {
-                    documents: `<div class="border-b pb-4 mb-4"><h3 class="font-semibold text-lg">The Ultimate Home Buyer's Kit</h3><p class="text-sm text-gray-600">All the documents you need for a smooth home purchase.</p><a href="#" class="text-blue-600 hover:underline mt-2 inline-block">Download Kit (.zip)</a></div>`,
-                    reports: `<div class="border-b pb-4 mb-4"><h3 class="font-semibold text-lg">Lake Mary Q3 Market Report</h3><p class="text-sm text-gray-600">In-depth analysis of market trends for the third quarter.</p><a href="#" class="text-blue-600 hover:underline mt-2 inline-block">Download Report (.pdf)</a></div>`,
-                    webinars: `<p>You have access to all webinars as a Pro member.</p>`,
-                    subscription: `<p>Your <strong>Pro Plan</strong> is active. Next renewal date: September 24, 2025.</p>`
+    try {
+        // Get a reference to our database and container
+        const database = client.database(databaseId);
+        const container = database.container(containerId);
+
+        // Query the database for the user by their ID (which is their email)
+        const { resource: user } = await container.item(username, username).read();
+
+        // Check if the user exists and the password matches
+        if (user && user.password === password) {
+            // Password matches, send back the user's data but OMIT the password for security
+            const { password, ...userData } = user;
+            context.res = {
+                status: 200,
+                body: {
+                    success: true,
+                    ...userData // This will include name, tier, content, etc.
                 }
-            }
-        };
-    } else {
-        context.res = {
-            status: 401,
-            body: { success: false, message: "Invalid credentials" }
-        };
+            };
+        } else {
+            // User not found or password incorrect
+            context.res = {
+                status: 401,
+                body: { success: false, message: "Invalid credentials" }
+            };
+        }
+    } catch (error) {
+        // A 404 error from Cosmos DB means the item (user) was not found.
+        if (error.code === 404) {
+             context.res = {
+                status: 401,
+                body: { success: false, message: "Invalid credentials" }
+            };
+        } else {
+            // For all other errors, log them and return a generic server error.
+            context.log.error(error);
+            context.res = {
+                status: 500,
+                body: { success: false, message: "An internal server error occurred." }
+            };
+        }
     }
 };
