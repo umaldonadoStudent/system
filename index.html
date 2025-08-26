@@ -5,18 +5,21 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>HCP Member Portal</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/markdown-it@14.1.0/dist/markdown-it.min.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Lora:wght@400;600&display=swap" rel="stylesheet">
+
     <style>
         body { font-family: 'Inter', sans-serif; }
+        .font-serif { font-family: 'Lora', serif; }
         .sidebar-link { transition: all 0.2s ease-in-out; }
         .sidebar-link:hover, .sidebar-link.active { background-color: #374151; color: white; }
         .content-page { display: none; }
         .content-page.active { display: block; }
         .loader {
             border: 4px solid #f3f3f3;
-            border-top: 4px solid #3498db;
+            border-top: 4px solid #3b82f6;
             border-radius: 50%;
             width: 30px;
             height: 30px;
@@ -25,6 +28,45 @@
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
+        }
+        .report-container {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            border: 1px solid #e2e8f0;
+        }
+        .report-content h1 {
+            font-family: 'Lora', serif;
+            font-size: 2.25rem;
+            font-weight: 600;
+            color: #1e3a8a;
+            border-bottom: 2px solid #93c5fd;
+            padding-bottom: 0.5rem;
+            margin-bottom: 1rem;
+        }
+        .report-content h3 {
+            font-family: 'Lora', serif;
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #1e40af;
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+        }
+        .report-content p, .report-content li {
+            font-size: 1.1rem;
+            line-height: 1.7;
+            color: #334155;
+        }
+        .report-content strong {
+            color: #1d4ed8;
+        }
+        .report-content ul {
+            list-style-type: disc;
+            margin-left: 1.5rem;
+            margin-bottom: 1rem;
+        }
+        .report-content hr {
+            border-color: #bfdbfe;
+            margin-top: 2rem;
+            margin-bottom: 2rem;
         }
     </style>
 </head>
@@ -60,7 +102,7 @@
         </div>
     </div>
 
-    <!-- MAIN DASHBOARD (Initially Hidden) -->
+    <!-- MAIN DASHBOARD -->
     <div id="dashboard" class="hidden">
         <div class="flex h-screen bg-gray-200">
             <!-- Sidebar -->
@@ -111,7 +153,7 @@
                     </div>
                 </header>
                 <main class="flex-1 overflow-x-hidden overflow-y-auto bg-gray-200 p-6">
-                    
+
                     <div id="dashboard-home-page" class="content-page active">
                         <h2 class="text-xl font-semibold text-gray-700 mb-4">Welcome to your Portal</h2>
                         <div class="p-6 bg-white rounded-lg shadow">
@@ -122,10 +164,11 @@
                         <h2 class="text-xl font-semibold text-gray-700 mb-4">Your Document Kits</h2>
                         <div id="documents-content" class="p-6 bg-white rounded-lg shadow"></div>
                     </div>
+
                     <div id="reports-page" class="content-page">
-                        <h2 class="text-xl font-semibold text-gray-700 mb-4">Reports & Analytics</h2>
-                        <div id="reports-content" class="p-6 bg-white rounded-lg shadow"></div>
+                        <div id="reports-content"></div>
                     </div>
+
                     <div id="webinars-page" class="content-page">
                         <h2 class="text-xl font-semibold text-gray-700 mb-4">Upcoming Webinars</h2>
                         <div id="webinars-content" class="p-6 bg-white rounded-lg shadow"></div>
@@ -141,7 +184,6 @@
     </div>
 
     <script>
-        // --- APPLICATION LOGIC ---
         document.addEventListener('DOMContentLoaded', () => {
             const loginScreen = document.getElementById('login-screen');
             const dashboard = document.getElementById('dashboard');
@@ -154,7 +196,8 @@
             const loginSpinner = document.getElementById('login-spinner');
 
             let currentUser = null;
-            
+            const md = window.markdownit();
+
             const navigateTo = (hash) => {
                 document.querySelectorAll('.content-page').forEach(page => page.classList.remove('active'));
                 sidebarNav.querySelectorAll('a').forEach(link => link.classList.remove('active'));
@@ -178,8 +221,26 @@
                 document.getElementById('user-name-display').textContent = user.name;
                 document.getElementById('user-tier-display').textContent = user.tier;
 
+                const reportsContentDiv = document.getElementById('reports-content');
+                if (user.content && user.content.reports) {
+                    const renderedHtml = md.render(user.content.reports);
+                    reportsContentDiv.innerHTML = `
+                        <div class="report-container p-8 rounded-lg shadow-xl">
+                            <div class="report-content">
+                                ${renderedHtml}
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    reportsContentDiv.innerHTML = `
+                        <h2 class="text-xl font-semibold text-gray-700 mb-4">Reports & Analytics</h2>
+                        <div class="p-6 bg-white rounded-lg shadow">
+                            <p class="text-gray-500">No premium reports found in your account.</p>
+                        </div>
+                    `;
+                }
+
                 document.getElementById('documents-content').innerHTML = user.content.documents || '<p class="text-gray-500">No document kits found.</p>';
-                document.getElementById('reports-content').innerHTML = user.content.reports || '<p class="text-gray-500">No reports found.</p>';
                 document.getElementById('webinars-content').innerHTML = user.content.webinars || '<p class="text-gray-500">No webinars found.</p>';
                 document.getElementById('subscription-content').innerHTML = user.content.subscription || '<p class="text-gray-500">No subscription details found.</p>';
 
@@ -195,7 +256,6 @@
                 loginForm.reset();
             };
 
-            // Check for a logged-in user in session storage on page load
             const storedUser = sessionStorage.getItem('loggedInUser');
             if (storedUser) {
                 try {
@@ -239,7 +299,7 @@
                     loginSpinner.classList.add('hidden');
                 }
             });
-            
+
             sidebarNav.addEventListener('click', (e) => {
                 const link = e.target.closest('a');
                 if (link) {
