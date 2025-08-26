@@ -1,6 +1,6 @@
 {
   "name": "hcp-dashboard-server",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Web server for the HCP Dashboard.",
   "main": "server.js",
   "scripts": {
@@ -8,6 +8,7 @@
   },
   "dependencies": {
     "@azure/cosmos": "^3.17.3",
-    "express": "^4.19.2"
+    "express": "^4.19.2",
+    "markdown-it": "^14.1.0"
   }
 }
